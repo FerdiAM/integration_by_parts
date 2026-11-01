@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration by Parts Solver</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nmc: {
+                            primaryblue: '#004c6e',
+                            primarygreen: '#0e6537',
+                            secondaryblue1: '#0b3853',
+                            secondaryblue2: '#126988',
+                            secondaryblue3: '#2f92a9',
+                            secondaryblue4: '#9ed9de',
+                            secondaryblue5: '#daf0f4',
+                            secondarygreen1: '#1fa162',
+                            secondarygreen2: '#6dbf67',
+                            secondarygreen3: '#b7da9b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering math -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-white text-slate-800 min-h-screen font-sans antialiased pb-12">
+
+    <!-- Header / Navbar -->
+    <header class="bg-nmc-secondaryblue1 border-b border-nmc-secondaryblue2 sticky top-0 z-50 shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-nmc-secondaryblue5/20 p-2.5 rounded-xl border border-nmc-secondaryblue4/40 text-nmc-secondaryblue4">
+                    <i class="fa-solid fa-square-root-variable text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">Integration by Parts Solver</h1>
+                    <p class="text-xs text-nmc-secondaryblue4">Calculus II Interactive Learning & Step-by-Step Helper</p>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <nav class="flex bg-nmc-primaryblue p-1 rounded-xl border border-nmc-secondaryblue2/60 text-xs font-medium">
+                <button id="tab-presets-btn" onclick="switchTab('presets')" class="px-4 py-2 rounded-lg bg-nmc-primarygreen text-white font-semibold shadow transition-all duration-200">
+                    <i class="fa-solid fa-book-open mr-1.5"></i> Preset Examples
+                </button>
+                <button id="tab-custom-btn" onclick="switchTab('custom')" class="px-4 py-2 rounded-lg text-nmc-secondaryblue5 hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Custom Solver
+                </button>
+                <button id="tab-liate-btn" onclick="switchTab('liate')" class="px-4 py-2 rounded-lg text-nmc-secondaryblue5 hover:text-white transition-all duration-200">
+                    <i class="fa-solid fa-layer-group mr-1.5"></i> LIATE Rule
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 mt-6">
+
+        <!-- PRESETS TAB -->
+        <section id="sec-presets" class="space-y-6">
+            <!-- Preset Category Selection -->
+            <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-nmc-primaryblue flex items-center gap-2">
+                        <i class="fa-solid fa-list text-base text-nmc-primarygreen"></i> Select a Practice Problem
+                    </h2>
+                    <span class="text-xs text-nmc-secondaryblue1 bg-white px-3 py-1 rounded-full border border-nmc-secondaryblue4/60 font-medium">
+                        Categorized by Integral Type
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <button onclick="loadPreset(0)" class="preset-btn p-3.5 rounded-xl text-left bg-white border-2 border-nmc-primarygreen text-nmc-primaryblue font-medium transition-all shadow-sm group">
+                        <div class="text-xs text-nmc-primarygreen font-bold mb-1">Algebraic & Trigonometric</div>
+                        <div class="font-mono text-sm text-slate-800 group-hover:text-nmc-primaryblue">$$\int x \cos(x) dx$$</div>
+                    </button>
+                    <button onclick="loadPreset(1)" class="preset-btn p-3.5 rounded-xl text-left bg-white border border-slate-200 hover:border-nmc-secondarygreen1 text-nmc-primaryblue font-medium transition-all shadow-sm group">
+                        <div class="text-xs text-slate-500 font-bold mb-1">Algebraic & Exponential</div>
+                        <div class="font-mono text-sm text-slate-800 group-hover:text-nmc-primaryblue">$$\int x e^{2x} dx$$</div>
+                    </button>
+                    <button onclick="loadPreset(2)" class="preset-btn p-3.5 rounded-xl text-left bg-white border border-slate-200 hover:border-nmc-secondarygreen1 text-nmc-primaryblue font-medium transition-all shadow-sm group">
+                        <div class="text-xs text-slate-500 font-bold mb-1">Logarithmic & Algebraic</div>
+                        <div class="font-mono text-sm text-slate-800 group-hover:text-nmc-primaryblue">$$\int x \ln(x) dx$$</div>
+                    </button>
+                    <button onclick="loadPreset(3)" class="preset-btn p-3.5 rounded-xl text-left bg-white border border-slate-200 hover:border-nmc-secondarygreen1 text-nmc-primaryblue font-medium transition-all shadow-sm group">
+                        <div class="text-xs text-slate-500 font-bold mb-1">Inverse Trigonometric</div>
+                        <div class="font-mono text-sm text-slate-800 group-hover:text-nmc-primaryblue">$$\int \arctan(x) dx$$</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Solution Container -->
+            <div id="solution-container" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md space-y-6">
+                <!-- Target Header -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                    <div>
+                        <span id="preset-category-tag" class="text-xs font-bold text-nmc-primarygreen uppercase tracking-wider bg-nmc-secondarygreen3/30 px-3 py-1 rounded-full border border-nmc-secondarygreen2/40">
+                            Algebraic & Trigonometric
+                        </span>
+                        <h3 class="text-xs text-slate-500 mt-2 font-medium">Target Problem:</h3>
+                    </div>
+                    <div id="preset-target-math" class="text-2xl font-bold text-white font-mono bg-nmc-primaryblue px-6 py-3 rounded-xl border border-nmc-secondaryblue1 shadow-sm">
+                        $$\int x \cos(x) dx$$
+                    </div>
+                </div>
+
+                <!-- Step 1 Card -->
+                <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-xl p-5 space-y-3">
+                    <div class="flex items-center gap-2 text-nmc-primaryblue font-bold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-list-check text-base text-nmc-primarygreen"></i> Step 1: Choose <span class="lowercase">u</span> and <span class="lowercase">dv</span> (LIATE)
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm space-y-1">
+                            <div class="text-xs text-slate-500 font-semibold">Chosen <span class="lowercase">u</span> (Differentiate)</div>
+                            <div class="text-nmc-primaryblue font-mono text-lg font-bold" id="step-u">$$u = x$$</div>
+                            <div class="text-xs text-nmc-primarygreen font-semibold" id="step-du">$$du = dx$$</div>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm space-y-1">
+                            <div class="text-xs text-slate-500 font-semibold">Chosen <span class="lowercase">dv</span> (Integrate)</div>
+                            <div class="text-nmc-primaryblue font-mono text-lg font-bold" id="step-dv">$$dv = \cos(x)dx$$</div>
+                            <div class="text-xs text-nmc-primarygreen font-semibold" id="step-v">$$v = \sin(x)$$</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 Card -->
+                <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-xl p-5 space-y-3">
+                    <div class="flex items-center gap-2 text-nmc-primaryblue font-bold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-calculator text-base text-nmc-primarygreen"></i> Step 2: Apply Formula (<span class="lowercase">uv</span> - &int; <span class="lowercase">v du</span>)
+                    </div>
+                    <div class="text-slate-800 text-base sm:text-lg bg-white p-4 rounded-lg border border-slate-200 font-mono text-center shadow-sm overflow-x-auto" id="step-formula-sub">
+                        $$x \sin(x) - \int \sin(x) dx$$
+                    </div>
+                </div>
+
+                <!-- Step 3 Card -->
+                <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-xl p-5 space-y-3">
+                    <div class="flex items-center gap-2 text-nmc-primaryblue font-bold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-square-check text-base text-nmc-primarygreen"></i> Step 3: Evaluate Remaining Integral
+                    </div>
+                    <div class="text-slate-800 text-sm sm:text-base bg-white p-4 rounded-lg border border-slate-200 font-mono text-center shadow-sm overflow-x-auto" id="step-remaining-eval">
+                        $$\int \sin(x) dx = -\cos(x)$$
+                    </div>
+                </div>
+
+                <!-- Final Answer Card -->
+                <div class="bg-gradient-to-r from-nmc-primaryblue via-nmc-secondaryblue1 to-nmc-primarygreen border border-nmc-primarygreen/40 rounded-xl p-5 text-center space-y-2 shadow-lg">
+                    <span class="text-xs font-bold uppercase tracking-wider text-nmc-secondarygreen3">Final Result</span>
+                    <div class="text-2xl font-bold text-white" id="step-final-ans">
+                        $$x \sin(x) + \cos(x) + C$$
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CUSTOM SOLVER TAB -->
+        <section id="sec-custom" class="hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-nmc-primaryblue flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-nmc-primarygreen"></i> Custom Integral Solver
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Enter any integral to solve using integration by parts, powered by AI step generation.
+                    </p>
+                </div>
+
+                <!-- Input Box -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Enter Integral (e.g. <code class="text-nmc-primarygreen font-bold">x * e^x</code>, <code class="text-nmc-primarygreen font-bold">x * sin(x)</code>, <code class="text-nmc-primarygreen font-bold">x * ln(x)</code>)
+                    </label>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="custom-input" placeholder="e.g. x * sin(x)" value="x * e^x" 
+                               class="flex-1 bg-nmc-secondaryblue5/20 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-base focus:outline-none focus:border-nmc-primarygreen shadow-inner font-mono">
+                        <button onclick="solveCustom()" class="bg-nmc-primarygreen hover:bg-nmc-secondarygreen1 text-white px-6 py-3 rounded-xl font-semibold shadow-md transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> Solve Step-by-Step
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Examples -->
+                <div class="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                    <span class="font-semibold text-slate-600">Try examples:</span>
+                    <button onclick="setCustom('x * exp(x)')" class="bg-nmc-secondaryblue5/40 text-nmc-primaryblue px-2.5 py-1 rounded border border-nmc-secondaryblue4/60 hover:border-nmc-primarygreen font-mono transition">x * exp(x)</button>
+                    <button onclick="setCustom('x^2 * ln(x)')" class="bg-nmc-secondaryblue5/40 text-nmc-primaryblue px-2.5 py-1 rounded border border-nmc-secondaryblue4/60 hover:border-nmc-primarygreen font-mono transition">x^2 * ln(x)</button>
+                    <button onclick="setCustom('x * cos(x)')" class="bg-nmc-secondaryblue5/40 text-nmc-primaryblue px-2.5 py-1 rounded border border-nmc-secondaryblue4/60 hover:border-nmc-primarygreen font-mono transition">x * cos(x)</button>
+                </div>
+            </div>
+
+            <!-- Custom Solution Output -->
+            <div id="custom-output" class="hidden bg-white border border-slate-200 rounded-2xl p-6 shadow-md space-y-6">
+                <!-- Dynamically filled by JS -->
+            </div>
+        </section>
+
+        <!-- LIATE RULE TAB -->
+        <section id="sec-liate" class="hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-nmc-primaryblue flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-nmc-primarygreen"></i> The LIATE Priority Rule
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        When choosing <span class="lowercase">u</span> for Integration by Parts, pick the function type that appears earliest in <strong>LIATE</strong>.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 p-4 rounded-xl space-y-2">
+                        <div class="text-2xl font-black text-nmc-primarygreen font-mono">L</div>
+                        <div class="text-sm font-bold text-nmc-primaryblue">Logarithmic</div>
+                        <p class="text-xs text-slate-600 font-mono">ln(x), log_2(x)</p>
+                    </div>
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 p-4 rounded-xl space-y-2">
+                        <div class="text-2xl font-black text-nmc-primarygreen font-mono">I</div>
+                        <div class="text-sm font-bold text-nmc-primaryblue">Inverse Trig</div>
+                        <p class="text-xs text-slate-600 font-mono">arctan(x), arcsin(x)</p>
+                    </div>
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 p-4 rounded-xl space-y-2">
+                        <div class="text-2xl font-black text-nmc-primarygreen font-mono">A</div>
+                        <div class="text-sm font-bold text-nmc-primaryblue">Algebraic</div>
+                        <p class="text-xs text-slate-600 font-mono">x, x^2, x^3 + 1</p>
+                    </div>
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 p-4 rounded-xl space-y-2">
+                        <div class="text-2xl font-black text-nmc-primarygreen font-mono">T</div>
+                        <div class="text-sm font-bold text-nmc-primaryblue">Trigonometric</div>
+                        <p class="text-xs text-slate-600 font-mono">sin(x), cos(x), sec^2(x)</p>
+                    </div>
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 p-4 rounded-xl space-y-2">
+                        <div class="text-2xl font-black text-nmc-primarygreen font-mono">E</div>
+                        <div class="text-sm font-bold text-nmc-primaryblue">Exponential</div>
+                        <p class="text-xs text-slate-600 font-mono">e^x, 2^x, e^(3x)</p>
+                    </div>
+                </div>
+
+                <div class="bg-nmc-secondaryblue5/40 p-4 rounded-xl border border-nmc-secondaryblue4/60 text-xs text-slate-700 space-y-2">
+                    <div class="font-bold text-nmc-primarygreen uppercase tracking-wider">Formula Reminder:</div>
+                    <div class="text-sm font-mono text-nmc-primaryblue text-center py-2 font-bold">
+                        $$\int u \, dv = u v - \int v \, du$$
+                    </div>
+                    <p>
+                        Choose <strong><span class="lowercase">u</span></strong> from the higher category in LIATE, and let <strong><span class="lowercase">dv</span></strong> be whatever remains (including <code class="text-nmc-primarygreen font-bold">dx</code>).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Preset Data
+        const presets = [
+            {
+                category: "Algebraic & Trigonometric",
+                target: "\\int x \\cos(x) dx",
+                u: "u = x",
+                du: "du = dx",
+                dv: "dv = \\cos(x)dx",
+                v: "v = \\sin(x)",
+                formulaSub: "x \\sin(x) - \\int \\sin(x) dx",
+                remainingEval: "\\int \\sin(x) dx = -\\cos(x)",
+                finalAns: "x \\sin(x) + \\cos(x) + C"
+            },
+            {
+                category: "Algebraic & Exponential",
+                target: "\\int x e^{2x} dx",
+                u: "u = x",
+                du: "du = dx",
+                dv: "dv = e^{2x}dx",
+                v: "v = \\frac{1}{2}e^{2x}",
+                formulaSub: "\\frac{1}{2}x e^{2x} - \\int \\frac{1}{2}e^{2x} dx",
+                remainingEval: "\\int \\frac{1}{2}e^{2x} dx = \\frac{1}{4}e^{2x}",
+                finalAns: "\\frac{1}{2}x e^{2x} - \\frac{1}{4}e^{2x} + C"
+            },
+            {
+                category: "Logarithmic & Algebraic",
+                target: "\\int x \\ln(x) dx",
+                u: "u = \\ln(x)",
+                du: "du = \\frac{1}{x}dx",
+                dv: "dv = x dx",
+                v: "v = \\frac{x^2}{2}",
+                formulaSub: "\\frac{x^2 \\ln(x)}{2} - \\int \\frac{x^2}{2} \\cdot \\frac{1}{x} dx",
+                remainingEval: "\\int \\frac{x}{2} dx = \\frac{x^2}{4}",
+                finalAns: "\\frac{x^2 \\ln(x)}{2} - \\frac{x^2}{4} + C"
+            },
+            {
+                category: "Inverse Trigonometric",
+                target: "\\int \\arctan(x) dx",
+                u: "u = \\arctan(x)",
+                du: "du = \\frac{1}{1+x^2}dx",
+                dv: "dv = dx",
+                v: "v = x",
+                formulaSub: "x \\arctan(x) - \\int \\frac{x}{1+x^2} dx",
+                remainingEval: "\\int \\frac{x}{1+x^2} dx = \\frac{1}{2}\\ln(1+x^2)",
+                finalAns: "x \\arctan(x) - \\frac{1}{2}\\ln(1+x^2) + C"
+            }
+        ];
+
+        // Sanitize LaTeX strings by removing commas
+        function sanitizeLatex(str) {
+            return str ? str.replace(/,/g, '') : '';
+        }
+
+        // Switch Tabs
+        function switchTab(tab) {
+            const secPresets = document.getElementById('sec-presets');
+            const secCustom = document.getElementById('sec-custom');
+            const secLiate = document.getElementById('sec-liate');
+
+            const btnPresets = document.getElementById('tab-presets-btn');
+            const btnCustom = document.getElementById('tab-custom-btn');
+            const btnLiate = document.getElementById('tab-liate-btn');
+
+            const activeClass = "px-4 py-2 rounded-lg bg-nmc-primarygreen text-white font-semibold shadow transition-all duration-200";
+            const inactiveClass = "px-4 py-2 rounded-lg text-slate-300 hover:text-white transition-all duration-200";
+
+            if (secPresets) secPresets.classList.add('hidden');
+            if (secCustom) secCustom.classList.add('hidden');
+            if (secLiate) secLiate.classList.add('hidden');
+
+            btnPresets.className = inactiveClass;
+            btnCustom.className = inactiveClass;
+            btnLiate.className = inactiveClass;
+
+            if (tab === 'presets' && secPresets) {
+                secPresets.classList.remove('hidden');
+                btnPresets.className = activeClass;
+            } else if (tab === 'custom' && secCustom) {
+                secCustom.classList.remove('hidden');
+                btnCustom.className = activeClass;
+            } else if (tab === 'liate' && secLiate) {
+                secLiate.classList.remove('hidden');
+                btnLiate.className = activeClass;
+            }
+        }
+
+        // Load Preset Example
+        function loadPreset(index) {
+            const p = presets[index];
+            if (!p) return;
+
+            // Highlight button
+            const buttons = document.querySelectorAll('.preset-btn');
+            buttons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('border-2', 'border-nmc-primarygreen');
+                    btn.classList.remove('border', 'border-slate-200');
+                } else {
+                    btn.classList.remove('border-2', 'border-nmc-primarygreen');
+                    btn.classList.add('border', 'border-slate-200');
+                }
+            });
+
+            // Update DOM
+            document.getElementById('preset-category-tag').innerText = p.category;
+            document.getElementById('preset-target-math').innerHTML = `$$${sanitizeLatex(p.target)}$$`;
+            document.getElementById('step-u').innerHTML = `$$${sanitizeLatex(p.u)}$$`;
+            document.getElementById('step-du').innerHTML = `$$${sanitizeLatex(p.du)}$$`;
+            document.getElementById('step-dv').innerHTML = `$$${sanitizeLatex(p.dv)}$$`;
+            document.getElementById('step-v').innerHTML = `$$${sanitizeLatex(p.v)}$$`;
+            document.getElementById('step-formula-sub').innerHTML = `$$${sanitizeLatex(p.formulaSub)}$$`;
+            document.getElementById('step-remaining-eval').innerHTML = `$$${sanitizeLatex(p.remainingEval)}$$`;
+            document.getElementById('step-final-ans').innerHTML = `$$${sanitizeLatex(p.finalAns)}$$`;
+
+            // Rerender MathJax
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        // Quick set custom input
+        function setCustom(val) {
+            const input = document.getElementById('custom-input');
+            if (input) input.value = val;
+        }
+
+        // Custom Solver using Gemini API
+        async function solveCustom() {
+            const inputVal = document.getElementById('custom-input').value.trim();
+            const outputDiv = document.getElementById('custom-output');
+
+            if (!inputVal) return;
+
+            outputDiv.classList.remove('hidden');
+            outputDiv.innerHTML = `
+                <div class="flex items-center justify-center gap-3 py-10 text-nmc-primarygreen">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+                    <span class="text-sm font-semibold text-slate-700">Solving integral using Integration by Parts...</span>
+                </div>
+            `;
+
+            const systemPrompt = "You are an expert calculus tutor. Solve the given integral using integration by parts step-by-step. Return JSON only.";
+            const userPrompt = `Solve the integral of: ${inputVal} using Integration by Parts. Return JSON in this schema:
+            {
+               "target": "\\int ... dx",
+               "u": "u = ...",
+               "du": "du = ...",
+               "dv": "dv = ...",
+               "v": "v = ...",
+               "formulaSub": "... - \\int ... dx",
+               "remainingEval": "\\int ... dx = ...",
+               "finalAns": "... + C"
+            }`;
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: {
+                            responseMimeType: "application/json"
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                const jsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (!jsonText) throw new Error("Could not parse AI response.");
+
+                const res = JSON.parse(jsonText);
+
+                outputDiv.innerHTML = `
+                    <div class="border-b border-slate-100 pb-4">
+                        <span class="text-xs font-bold text-nmc-primarygreen uppercase tracking-wider bg-nmc-secondarygreen3/30 px-3 py-1 rounded-full border border-nmc-secondarygreen2/40">
+                            Custom Solution
+                        </span>
+                        <div class="text-2xl font-bold text-white font-mono bg-nmc-primaryblue px-6 py-3 rounded-xl border border-nmc-secondaryblue1 shadow-sm mt-3 text-center">
+                            $$${sanitizeLatex(res.target || inputVal)}$$
+                        </div>
+                    </div>
+
+                    <!-- Step 1 Card -->
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-nmc-primaryblue font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-list-check text-base text-nmc-primarygreen"></i> Step 1: Choose <span class="lowercase">u</span> and <span class="lowercase">dv</span> (LIATE)
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm space-y-1">
+                                <div class="text-xs text-slate-500 font-semibold">Chosen <span class="lowercase">u</span> (Differentiate)</div>
+                                <div class="text-nmc-primaryblue font-mono text-lg font-bold">$$${sanitizeLatex(res.u)}$$</div>
+                                <div class="text-xs text-nmc-primarygreen font-semibold">$$${sanitizeLatex(res.du)}$$</div>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm space-y-1">
+                                <div class="text-xs text-slate-500 font-semibold">Chosen <span class="lowercase">dv</span> (Integrate)</div>
+                                <div class="text-nmc-primaryblue font-mono text-lg font-bold">$$${sanitizeLatex(res.dv)}$$</div>
+                                <div class="text-xs text-nmc-primarygreen font-semibold">$$${sanitizeLatex(res.v)}$$</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 Card -->
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-nmc-primaryblue font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-calculator text-base text-nmc-primarygreen"></i> Step 2: Apply Formula (<span class="lowercase">uv</span> - &int; <span class="lowercase">v du</span>)
+                        </div>
+                        <div class="text-slate-800 text-base sm:text-lg bg-white p-4 rounded-lg border border-slate-200 font-mono text-center shadow-sm overflow-x-auto">
+                            $$${sanitizeLatex(res.formulaSub)}$$
+                        </div>
+                    </div>
+
+                    <!-- Step 3 Card -->
+                    <div class="bg-nmc-secondaryblue5/30 border border-nmc-secondaryblue4/60 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center gap-2 text-nmc-primaryblue font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-square-check text-base text-nmc-primarygreen"></i> Step 3: Evaluate Remaining Integral
+                        </div>
+                        <div class="text-slate-800 text-sm sm:text-base bg-white p-4 rounded-lg border border-slate-200 font-mono text-center shadow-sm overflow-x-auto">
+                            $$${sanitizeLatex(res.remainingEval)}$$
+                        </div>
+                    </div>
+
+                    <!-- Final Answer Card -->
+                    <div class="bg-gradient-to-r from-nmc-primaryblue via-nmc-secondaryblue1 to-nmc-primarygreen border border-nmc-primarygreen/40 rounded-xl p-5 text-center space-y-2 shadow-lg">
+                        <span class="text-xs font-bold uppercase tracking-wider text-nmc-secondarygreen3">Final Result</span>
+                        <div class="text-2xl font-bold text-white">
+                            $$${sanitizeLatex(res.finalAns)}$$
+                        </div>
+                    </div>
+                `;
+
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise();
+                }
+
+            } catch (err) {
+                console.error(err);
+                outputDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                        Unable to solve this integral automatically. Please verify your mathematical syntax.
+                    </div>
+                `;
+            }
+        }
+
+        // Initial Load
+        window.addEventListener('load', () => {
+            loadPreset(0);
+        });
+    </script>
+</body>
+</html>
